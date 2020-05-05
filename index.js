@@ -14,9 +14,9 @@
   // API URL
   const BASE_URL = 'https://api.lyrics.ovh/v1';
 
-  // D3 Global variables
+  // d3 Global variables
   const CHART_MARGIN = {LEFT: 100, RIGHT: 10, TOP: 25, BOTTOM: 150};
-  const D3 = d3;
+  let d3 = window.d3;
   let d3Chart;
   let width, height;
   let xScale, yScale, colorScale;
@@ -211,7 +211,7 @@
 
     // Remove block notes and puntctuation.
     let regexPattern = /\[.*\]/;
-    lyrics.replace(regexPattern, '')
+    lyrics.replace(regexPattern, '');
     regexPattern = /[.,/#!$%^&*;:{}=_`~()?\n]/g;
     lyrics = lyrics.replace(regexPattern, ' ');
 
@@ -221,7 +221,7 @@
     return words;
   }
 
-  /** Use the color scale for the D3 chart to determine the broder of each artist card. */
+  /** Use the color scale for the d3 chart to determine the broder of each artist card. */
   function getBorderColors() {
     let cards = qsa('.card');
     cards.forEach(card => {
@@ -318,7 +318,7 @@
     getPercentage(artist);
   }
 
-  // D3 functions
+  // d3 functions
   /**
    * Finds size available for chart and sets up the d3 chart which is attached to the HTML figure
    * element with id chart. Then loads the available data.
@@ -328,12 +328,12 @@
     if (d3Chart) {
       id('chart').innerHTML = '';
     }
-    d3Chart = D3.select('#chart')
+    d3Chart = d3.select('#chart')
       .append('svg')
-        .attr('width', width + CHART_MARGIN.LEFT + CHART_MARGIN.RIGHT)
-        .attr('height', height + CHART_MARGIN.TOP + CHART_MARGIN.BOTTOM)
+      .attr('width', width + CHART_MARGIN.LEFT + CHART_MARGIN.RIGHT)
+      .attr('height', height + CHART_MARGIN.TOP + CHART_MARGIN.BOTTOM)
       .append('g')
-        .attr('transform', `translate(${CHART_MARGIN.LEFT}, ${CHART_MARGIN.TOP})`);
+      .attr('transform', `translate(${CHART_MARGIN.LEFT}, ${CHART_MARGIN.TOP})`);
 
     loadData();
   }
@@ -348,27 +348,35 @@
     updateChart();
   }
 
-  /** Uses built in d3 color scale with 12 colors, maps artists to color */
+  /**
+   * Uses built in d3 color scale with 12 colors, maps artists to color.
+   * @return {string} Hex color value from built in scale.
+   */
   function getColorScale() {
-    return D3.scaleOrdinal()
-      .domain(chartData.map( data => {
+    return d3.scaleOrdinal()
+      .domain(chartData.map(data => {
         return data.artist;
       }))
-      .range(D3.schemePaired);
+      .range(d3.schemePaired);
   }
 
   /** Find the size of the parent container of the chart. */
   function getSize() {
-    width = id('chart').clientWidth - CHART_MARGIN.LEFT - CHART_MARGIN.TOP;
-    height = 600 - CHART_MARGIN.TOP - CHART_MARGIN.BOTTOM;
+    const WIDTH = id('chart').clientWidth;
+    const HEIGHT = 600;
+    width = WIDTH - CHART_MARGIN.LEFT - CHART_MARGIN.TOP;
+    height = HEIGHT - CHART_MARGIN.TOP - CHART_MARGIN.BOTTOM;
   }
 
-  /** Set up a band scale which converts the current artists to a position on the x axis. */
+  /**
+   * Set up a band scale which converts the current artists to a position on the x axis.
+   * @return {number} Pixel position on X axis for this artist.
+   */
   function getXScale() {
     const LOWER_RANGE = 0;
     const PADDING_VALUE = 0.3;
 
-    return D3.scaleBand()
+    return d3.scaleBand()
       .domain(chartData.map( data => {
         return data.artist;
       }))
@@ -380,26 +388,29 @@
   /**
    * Set up a linear scale that sizes the height of the recangle based on percentage of lyrics
    * that are unique.
+   * @returns {number} Pixel position representing the height of bar in chart.
    */
   function getYScale() {
     const LOWER_DOMAIN = 0;
     const UPPER_DOMAIN = 100;
     const UPPER_RANGE = 0;
 
-    return D3.scaleLinear()
+    return d3.scaleLinear()
       .domain([LOWER_DOMAIN, UPPER_DOMAIN])
       .range([height, UPPER_RANGE]);
   }
 
   /** Make the labels and axis for the x axis. */
   function setXAxis() {
-    const X_AXIS_CALL = D3.axisBottom(xScale);
+    const X_LABEL_X_OFFSET = width / 2;
+    const X_LABEL_Y_OFFSET = height + 125;
+    const X_AXIS_CALL = d3.axisBottom(xScale);
 
     // X Axis Label
     d3Chart.append('text')
       .attr('class', 'x axis-label')
-      .attr('x', width / 2)
-      .attr('y', height + 125)
+      .attr('x', X_LABEL_X_OFFSET)
+      .attr('y', X_LABEL_Y_OFFSET)
       .attr('font-size', '24px')
       .attr('text-anchor', 'middle')
       .text('Artist');
@@ -419,7 +430,9 @@
 
   /** Make the labels and axis for the y axis. */
   function setYAxis() {
-    const Y_AXIS_CALL = D3.axisLeft(yScale)
+    const Y_LABEL_X_OFFSET = -height / 2;
+    const Y_LABEL_Y_OFFSET = -80;
+    const Y_AXIS_CALL = d3.axisLeft(yScale)
       .ticks(10)
       .tickFormat( data => {
         return data + '%';
@@ -428,8 +441,8 @@
     // Y Axis Label
     d3Chart.append('text')
       .attr('class', 'y axis-label')
-      .attr('x', -height/2)
-      .attr('y', -80)
+      .attr('x', Y_LABEL_X_OFFSET)
+      .attr('y', Y_LABEL_Y_OFFSET)
       .attr('font-size', '24px')
       .attr('text-anchor', 'middle')
       .attr('transform', 'rotate(-90)')
@@ -440,7 +453,7 @@
       .attr('class', 'y-axis')
       .call(Y_AXIS_CALL)
       .selectAll('text')
-      .attr('font-size', '16px')
+      .attr('font-size', '16px');
   }
 
   /**
@@ -450,7 +463,7 @@
   function updateChart() {
     const Y_ZERO = yScale(0);
     const TRANSITION_TIME_MS = 500;
-    const T = D3.transition().duration(TRANSITION_TIME_MS);
+    const TRANSITION = d3.transition().duration(TRANSITION_TIME_MS);
 
     const rects = d3Chart.selectAll('rect')
       .data(chartData);
@@ -469,13 +482,13 @@
       .attr('fill', data => {
         return colorScale(data.artist);
       })
-      .transition(T)
+      .transition(TRANSITION)
       .attr('y', data => {
         return yScale(data.percentUnique);
       })
       .attr('height', data => {
         return height - yScale(data.percentUnique);
-      })
+      });
   }
 
   // Given Helper functions
