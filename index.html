@@ -1,19 +1,74 @@
 <!DOCTYPE html>
 <!--
   Name: Justin Clayton
-  Date: April 29, 2020
+  Date: May 3, 2020
   Section: CSE 154 AD
   This is the index.html page for my CP3 webpage.
 -->
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <title>CP3: Fetch</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Slab">
     <link rel="stylesheet" href="styles.css">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
     <script src="index.js"></script>
   </head>
 
   <body>
+    <header>
+      <h1>Lyric Uniqueness Analyzer</h1>
+    </header>
 
+    <main>
+      <section>
+        <h2>About this site</h2>
+        <p>
+          This website uses the lyrics.ovh API to do some simple analysis on the unique words that
+          an artist uses in their songs. The idea for this comes from a vocabulary analysis of
+          Hip Hop artists done by Matt Daniels.
+          <a href="https://pudding.cool/projects/vocabulary/index.html">Link</a>
+        </p>
+        <p>
+          To use this simply enter an artist and a song to add that set of lyrics to the data set.
+          Simple token analysis will be done on the words in the lyrics to determine the percentage
+          of unique words per artist. As more songs are added from each artist the percentage will
+          represent an aggregate of all the songs queried for. The data will then be loaded on a D3
+          bar chart which will graphically represent the percent of unique words in all the songs
+          that have been requested. Cards for each artist will be added below the chart with more
+          detailed information.
+        </p>
+      </section>
+      <section id='request-form-section'>
+        <form id="lyric-request-form">
+          <label for="artist">Artist: </label>
+          <input name="artist" type="text">
+          <label for="song">Song: </label>
+          <input name="song" type="text">
+          <br>
+          <button id="submit-btn">Add Lyrics</button>
+        </form>
+      </section>
+      <figure id="chart">
+        <h2>Lyrical Uniqueness Comparison Chart</h2>
+      </figure>
+      <details>
+        <h2>Artist Details</h2>
+        <div id="card-container">
+          <div class="card">
+            <h3>Aesop Rock</h3>
+            <p>Unique Words: 200</p>
+            <p>Total Words: 500</p>
+            <p>Percent Unique: 40%</p>
+          </div>
+        </div>
+      </details>
+    </main>
+
+    <footer>
+      <p>
+        Site &copy; 2020. Justin Clayton. Other attributions cited in document or page source.
+      </p>
+    </footer>
   </body>
 </html>

@@ -1,14 +1,89 @@
 /*
   Name: Justin Clayton
-  Date: Aptil 17, 2020
+  Date: May 3, 2020
   Section: CSE 154 AD
-  This is the main style CSS page for index.html and contains rules to style the poker game.
 */
 
 /* HTML Selector Rules */
+body {
+  font-family: "Roboto Slab", monospace;
+  margin: 0;
+}
 
+button {
+  color: white;
+  background-color: forestgreen;
+  margin-top: 10px;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+button, label, p {
+  font-size: 1.1rem;
+}
+
+figure {
+  margin: 0 auto;
+}
+
+footer {
+  padding: 5px 50px;
+  margin-bottom: 0;
+}
+
+footer, header {
+  background-color: rgb(34, 39, 87);
+  color: rgb(230, 231, 220);
+}
+
+form, h2, h3, #request-message {
+  text-align: center;
+}
+
+header {
+  margin-bottom: 25px;
+  padding: 15px 100px;
+}
+
+h1 {
+  font-size: 2.6rem;
+}
+
+main {
+  width: 80%;
+  margin: 15px auto 35px auto;
+}
+
+section {
+  border-radius: 10px;
+  margin-bottom: 30px;
+  padding: 15px 50px;
+}
+
+section, .card {
+  background-color: rgb(226, 226, 226);
+  border-radius: 10px;
+}
 
 /* Class Rules */
+.card {
+  width: 250px;
+  height: 250px;
+  margin: 15px;
+  padding-left: 10px;
+}
 
+.error-message {
+  color: red;
+}
+
+.success-message {
+  color: green;
+}
 
 /* ID Rules */
+#card-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+}
