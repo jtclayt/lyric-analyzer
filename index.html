@@ -3,7 +3,11 @@
   Name: Justin Clayton
   Date: May 3, 2020
   Section: CSE 154 AD
-  This is the index.html page for my CP3 webpage.
+  This is the index.html page for my CP3 webpage. The page uses the lyrics.ovh API to get song
+  lyrics requested by a user. The lyrics are broken down into individual words and analyzed for
+  uniqueness. The unique word use of each artist is compared based on percent of total words that
+  are unique using a D3 bar chart. I learned how to use D3 for a work project using the
+  Udemy tutorial: https://www.udemy.com/course/masteringd3js/.
 -->
 <html lang="en">
   <head>
@@ -30,7 +34,7 @@
           <a href="https://pudding.cool/projects/vocabulary/index.html">Link</a>
         </p>
         <p>
-          To use this simply enter an artist and a song to add that set of lyrics to the data set.
+          To use this simply enter an artist and a song to add the words in the lyrics to the data set.
           Simple token analysis will be done on the words in the lyrics to determine the percentage
           of unique words per artist. As more songs are added from each artist the percentage will
           represent an aggregate of all the songs queried for. The data will then be loaded on a D3
@@ -38,36 +42,42 @@
           that have been requested. Cards for each artist will be added below the chart with more
           detailed information.
         </p>
+        <p>
+          <em>A note on uniqueness: The tokens would consider words like don't and do not different.
+          Also, slang and purposely misspelled words will be tokenized as unique.</em>
+        </p>
       </section>
       <section id='request-form-section'>
+        <h2>Add Song to Dataset</h2>
         <form id="lyric-request-form">
           <label for="artist">Artist: </label>
-          <input name="artist" type="text">
+          <input name="artist" type="text" required>
           <label for="song">Song: </label>
-          <input name="song" type="text">
+          <input name="song" type="text" required>
           <br>
-          <button id="submit-btn">Add Lyrics</button>
+          <button id="submit-btn" type="submit">Add Lyrics</button>
         </form>
       </section>
       <figure id="chart">
         <h2>Lyrical Uniqueness Comparison Chart</h2>
       </figure>
       <details>
+        <summary>Artist Details</summary>
         <h2>Artist Details</h2>
-        <div id="card-container">
-          <div class="card">
-            <h3>Aesop Rock</h3>
-            <p>Unique Words: 200</p>
-            <p>Total Words: 500</p>
-            <p>Percent Unique: 40%</p>
-          </div>
-        </div>
+        <div id="card-container"></div>
+      </details>
+      <details>
+        <summary>Most Recent Lyrics</summary>
+        <p id="lyrics"></p>
       </details>
     </main>
 
     <footer>
       <p>
         Site &copy; 2020. Justin Clayton. Other attributions cited in document or page source.
+      </p>
+      <p>
+        Data provided by lyrics.ovh API <a href="https://lyricsovh.docs.apiary.io/#">link</a>
       </p>
     </footer>
   </body>

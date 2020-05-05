@@ -2,23 +2,25 @@
  * Name: Justin Clayton
  * Date: May 3, 2020
  * Section: CSE 154 AD
- *
+ * This is the main JavaScript document for the CP3 webpage and contains all the logic to fetch
+ * requested songs from the lyrics API. It handles errors if the song can not be found or a fetch
+ * error occurs and if the user tries to make repeat requests. This page also handles setting up
+ * the bar chart visulisation which is continuously updated on successful requests. When a request
+ * is processed a card detailing the received data is dynamically generated or updated to display
+ * some information to the user.
  */
 'use strict';
 (function() {
   // API URL
   const BASE_URL = 'https://api.lyrics.ovh/v1';
+
   // D3 Global variables
   const CHART_MARGIN = { LEFT: 100, RIGHT: 10, TOP: 25, BOTTOM: 150 };
   let d3Chart;
   let width, height;
   let xScale, yScale, colorScale;
-  let chartData = [
-    {artist: 'Aesop Rock', percentUnique: 87},
-    {artist: 'Atmosphere', percentUnique: 73},
-    {artist: 'Pink Floyd', percentUnique: 33},
-    {artist: 'ABBA', percentUnique: 11}
-  ];
+  let chartData = [];
+
   // Webpage global variables
   let artistDetails = {};
 
@@ -28,30 +30,94 @@
   /** Set up the page for user interaction. */
   function init() {
     initChart();
-    id('submit-btn').addEventListener('click', onSubmit);
+    id('lyric-request-form').addEventListener('submit', onSubmit);
   }
 
   // Event Listeners
   /** Check the inputs and make the request when the form is submitted. */
   function onSubmit(event) {
     event.preventDefault();
+    createMessage('success', 'Submitting request...');
     let artist = qs('input[name="artist"]').value.trim();
     let song = qs('input[name="song"]').value.trim();
-    if (song && artist) {
-      let url = `${BASE_URL}/${artist}/${song}`;
+    let url = `${BASE_URL}/${artist}/${song}`;
+    let isRepeatRequest = checkRepeat(artist, song);
+
+    if (isRepeatRequest) {
+      createMessage('error', `${song} by ${artist} has already been requested.`);
+    } else {
       fetch(url)
         .then(checkStatus)
         .then(res => res.json())
         .then(data => {
           processResponse(data, artist, song);
         })
-        .catch(console.error);
-    } else {
-      createMessage('error', 'Please enter an artist and song to make a request.')
+        .catch(handleError);
     }
   }
 
   // Fetch helper functions
+  /**
+   * Add text content to an existing artistCard div.
+   * @param {obejct} artistCard - The HTML div object element representing a card.
+   * @param {string} artist - The artist to update the card for.
+   */
+  function addCardContent(artistCard, artist) {
+    let title = gen('h3');
+    title.textContent = artist;
+    let totalUniqueWords = gen('p');
+    totalUniqueWords.textContent = `Unique Words: ${artistDetails[artist].totalUniqueWords}`;
+    let totalWords = gen('p');
+    totalWords.textContent = `Total Words: ${artistDetails[artist].totalWords}`;
+    let percentUnique = gen('p');
+    percentUnique.textContent = `Percent Unique: ${artistDetails[artist].percentUnique}%`;
+    artistCard.appendChild(title);
+    artistCard.appendChild(totalUniqueWords);
+    artistCard.appendChild(totalWords);
+    artistCard.appendChild(percentUnique);
+  }
+
+  /**
+   * Adds or updates artist information in the array used to format the d3 chart.
+   * @param {string} artist - The artist to update chart data for.
+   */
+  function addChartData(artist) {
+    let index = chartData.findIndex(element => {
+      return element.artist === artist;
+    });
+    let newData = {
+      artist: artist,
+      percentUnique: artistDetails[artist].percentUnique
+    }
+    if (index === -1) {
+      chartData.push(newData);
+    } else {
+      chartData[index] = newData;
+    }
+    sortChartData();
+  }
+
+  /**
+   * Checks whether the user has already requested the song and artist before.
+   * @param {string} artist - The requested artist.
+   * @param {string} song - The requested song.
+   * @return {boolean} If this song has been requested.
+   */
+  function checkRepeat(artist, song) {
+    artist = artist.toLowerCase();
+    song = song.toLowerCase();
+    let isRepeatRequest;
+
+    try {
+      isRepeatRequest = artistDetails[artist].requestedSongs.some(s => {
+        return s === song;
+      });
+    } catch (error) {
+      isRepeatRequest = false;
+    }
+    return isRepeatRequest;
+  }
+
   /** Check whether fetch returned a status of 200 OK, throw an error if not. */
   function checkStatus(response) {
     if (response.ok) {
@@ -77,7 +143,7 @@
   }
 
   /**
-   *
+   * Creates or updates the content in the details card for an artist.
    * @param {string} artist - The artist to create/update the card for.
    */
   function createCard(artist) {
@@ -91,19 +157,7 @@
       artistCard.classList.add('card');
       id('card-container').appendChild(artistCard);
     }
-
-    let title = gen('h3');
-    title.textContent = artist;
-    let totalUniqueWords = gen('p');
-    totalUniqueWords.textContent = `Unique Words: ${artistDetails[artist].totalUniqueWords}`;
-    let totalWords = gen('p');
-    totalWords.textContent = `Total Words: ${artistDetails[artist].totalWords}`;
-    let percentUnique = gen('p');
-    percentUnique.textContent = `Percent Unique: ${artistDetails[artist].percentUnique}`;
-    artistCard.appendChild(title);
-    artistCard.appendChild(totalUniqueWords);
-    artistCard.appendChild(totalWords);
-    artistCard.appendChild(percentUnique);
+    addCardContent(artistCard, artist);
   }
 
   /**
@@ -145,13 +199,24 @@
    * @return {array} An array of the words in the lyrics.
    */
   function extractWords(lyrics) {
-    let lyricsLowerCase = lyrics.toLowerCase();
+    lyrics = lyrics.toLowerCase();
+
+    // Remove punctuation.
     let regexPattern = /[.,\/#!$%\^&\*;:{}=\-_`~()\?\n]/g;
-    let lyricsWithoutPunct = lyricsLowerCase.replace(regexPattern, ' ');
-    let words = lyricsWithoutPunct.split(' ').filter(word => {
+    lyrics = lyrics.replace(regexPattern, ' ');
+
+    let words = lyrics.split(' ').filter(word => {
       return word;
     });
     return words;
+  }
+
+  /** Use the color scale for the D3 chart to determine the broder of each artist card. */
+  function getBorderColors() {
+    let cards = qsa('.card');
+    cards.forEach(card => {
+      card.style.borderColor = colorScale(card.id);
+    });
   }
 
   /**
@@ -162,12 +227,11 @@
     const PERCENT = 100;
     let numUnique = artistDetails[artist].totalUniqueWords;
     let total = artistDetails[artist].totalWords;
-    let percent = Math.round(numUnique / total * PERCENT);
-    artistDetails[artist].percentUnique = `${percent}%`
+    artistDetails[artist].percentUnique = Math.round(numUnique / total * PERCENT);
   }
 
   /**
-   *
+   * Process the words in the array and get a count of each time the word appears.
    * @param {array} words - An aray of the words in the lyrics.
    */
   function getWordCounts(words) {
@@ -195,14 +259,10 @@
    * @param {string} song - Currently requested song.
    */
   function processResponse(data, artist, song) {
-    let message = `Successfully retrieved lyrics of ${song} by ${artist}. Processing...`;
-    createMessage('success', message);
-    let words = extractWords(data.lyrics);
-
-    // Try to make artist and song unique so will not be queried again.
-    artist = artist.toLowerCase();
+    id('lyrics').textContent = data.lyrics;
     song = song.toLowerCase();
-
+    artist = artist.toLowerCase();
+    let words = extractWords(data.lyrics);
     let songInfo = {
       artist: artist,
       song: song,
@@ -216,6 +276,18 @@
       updateArtist(songInfo);
     }
     createCard(artist);
+    addChartData(artist);
+    initChart();
+    getBorderColors();
+    let message = `Successfully loaded data for ${song} by ${artist}. Ready to add more songs.`
+    createMessage('success', message);
+  }
+
+  /** Sorts the chart data in descending order. */
+  function sortChartData() {
+    chartData.sort((element1, element2) => {
+      return element2.percentUnique - element1.percentUnique;
+    });
   }
 
   /**
@@ -421,9 +493,9 @@
   }
 
   /**
-   * Returns all elements matching selector.
+   * Returns first element matching selector.
    * @param {string} selector - CSS query selector.
-   * @returns {array} - Array of DOM objects with associated selector.
+   * @returns {object} - DOM object associated selector.
    */
   function qsa(selector) {
     return document.querySelectorAll(selector);

@@ -2,6 +2,9 @@
   Name: Justin Clayton
   Date: May 3, 2020
   Section: CSE 154 AD
+  This is the main CSS style document and contains all the rules to get a consistent look and feel
+  for the web page design. Additionally, it defines the class rules for cards which will be created
+  when the user requests songs and handles styling of feedback messages to the user.
 */
 
 /* HTML Selector Rules */
@@ -22,13 +25,27 @@ button, label, p {
   font-size: 1.1rem;
 }
 
+details {
+  margin-bottom: 30px;
+}
+
 figure {
   margin: 0 auto;
 }
 
 footer {
+  display: flex;
+  justify-content: space-between;
   padding: 5px 50px;
   margin-bottom: 0;
+}
+
+footer > p > a {
+  color: white;
+}
+
+footer > p > a:visited {
+  color: rgb(172, 171, 171);
 }
 
 footer, header {
@@ -47,6 +64,10 @@ header {
 
 h1 {
   font-size: 2.6rem;
+}
+
+input {
+  margin-right: 15px;
 }
 
 main {
@@ -71,6 +92,11 @@ section, .card {
   height: 250px;
   margin: 15px;
   padding-left: 10px;
+  border: 2px solid white;
+}
+
+.card, #chart {
+  text-transform: capitalize;
 }
 
 .error-message {
