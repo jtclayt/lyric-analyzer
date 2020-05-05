@@ -16,6 +16,7 @@
 
   // D3 Global variables
   const CHART_MARGIN = {LEFT: 100, RIGHT: 10, TOP: 25, BOTTOM: 150};
+  const D3 = d3;
   let d3Chart;
   let width, height;
   let xScale, yScale, colorScale;
@@ -208,14 +209,15 @@
   function extractWords(lyrics) {
     lyrics = lyrics.toLowerCase();
 
-    // Remove punctuation.
-    let regexPattern = new RegExp('[.,\/#!$%\^&\*;:{}=_`~()\?\n]', 'g');
+    // Remove block notes and puntctuation.
+    let regexPattern = /\[.*\]/;
+    lyrics.replace(regexPattern, '')
+    regexPattern = /[.,/#!$%^&*;:{}=_`~()?\n]/g;
     lyrics = lyrics.replace(regexPattern, ' ');
 
     let words = lyrics.split(' ').filter(word => {
       return word;
     });
-    console.log(words);
     return words;
   }
 
@@ -241,6 +243,7 @@
   /**
    * Process the words in the array and get a count of each time the word appears.
    * @param {array} words - An aray of the words in the lyrics.
+   * @returns {object} An object with keys of words found and values of the number found.
    */
   function getWordCounts(words) {
     let wordCounts = {};
@@ -254,7 +257,10 @@
     return wordCounts;
   }
 
-  /** Handle an error if thrown during fetch */
+  /**
+   * Handle an error if thrown during fetch
+   * @param {object} error - The error object thrown.
+   */
   function handleError(error) {
     createMessage('error', error.message);
   }
@@ -287,7 +293,7 @@
     addChartData(artist);
     initChart();
     getBorderColors();
-    let message = `Successfully loaded data for ${song} by ${artist}. Ready to add more songs.`
+    let message = `Successfully loaded data for ${song} by ${artist}. Ready to add more songs.`;
     createMessage('success', message);
   }
 
@@ -322,7 +328,7 @@
     if (d3Chart) {
       id('chart').innerHTML = '';
     }
-    d3Chart = d3.select('#chart')
+    d3Chart = D3.select('#chart')
       .append('svg')
         .attr('width', width + CHART_MARGIN.LEFT + CHART_MARGIN.RIGHT)
         .attr('height', height + CHART_MARGIN.TOP + CHART_MARGIN.BOTTOM)
@@ -344,11 +350,11 @@
 
   /** Uses built in d3 color scale with 12 colors, maps artists to color */
   function getColorScale() {
-    return d3.scaleOrdinal()
+    return D3.scaleOrdinal()
       .domain(chartData.map( data => {
         return data.artist;
       }))
-      .range(d3.schemePaired);
+      .range(D3.schemePaired);
   }
 
   /** Find the size of the parent container of the chart. */
@@ -362,7 +368,7 @@
     const LOWER_RANGE = 0;
     const PADDING_VALUE = 0.3;
 
-    return d3.scaleBand()
+    return D3.scaleBand()
       .domain(chartData.map( data => {
         return data.artist;
       }))
@@ -380,14 +386,14 @@
     const UPPER_DOMAIN = 100;
     const UPPER_RANGE = 0;
 
-    return d3.scaleLinear()
+    return D3.scaleLinear()
       .domain([LOWER_DOMAIN, UPPER_DOMAIN])
       .range([height, UPPER_RANGE]);
   }
 
   /** Make the labels and axis for the x axis. */
   function setXAxis() {
-    const X_AXIS_CALL = d3.axisBottom(xScale);
+    const X_AXIS_CALL = D3.axisBottom(xScale);
 
     // X Axis Label
     d3Chart.append('text')
@@ -413,7 +419,7 @@
 
   /** Make the labels and axis for the y axis. */
   function setYAxis() {
-    const Y_AXIS_CALL = d3.axisLeft(yScale)
+    const Y_AXIS_CALL = D3.axisLeft(yScale)
       .ticks(10)
       .tickFormat( data => {
         return data + '%';
@@ -444,7 +450,7 @@
   function updateChart() {
     const Y_ZERO = yScale(0);
     const TRANSITION_TIME_MS = 500;
-    const T = d3.transition().duration(TRANSITION_TIME_MS);
+    const T = D3.transition().duration(TRANSITION_TIME_MS);
 
     const rects = d3Chart.selectAll('rect')
       .data(chartData);
@@ -455,21 +461,21 @@
     // Add new elements
     rects.enter()
       .append('rect')
-        .attr('y', Y_ZERO)
-        .attr('x', d => {
-          return xScale(d.artist);
-        })
-        .attr('width', xScale.bandwidth)
-        .attr('fill', data => {
-          return colorScale(data.artist);
-        })
-        .transition(T)
-        .attr('y', data => {
-          return yScale(data.percentUnique);
-        })
-        .attr('height', data => {
-          return height - yScale(data.percentUnique);
-        })
+      .attr('y', Y_ZERO)
+      .attr('x', data => {
+        return xScale(data.artist);
+      })
+      .attr('width', xScale.bandwidth)
+      .attr('fill', data => {
+        return colorScale(data.artist);
+      })
+      .transition(T)
+      .attr('y', data => {
+        return yScale(data.percentUnique);
+      })
+      .attr('height', data => {
+        return height - yScale(data.percentUnique);
+      })
   }
 
   // Given Helper functions
