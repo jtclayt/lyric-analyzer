@@ -34,13 +34,13 @@
           <a href="https://pudding.cool/projects/vocabulary/index.html">Link</a>
         </p>
         <p>
-          To use this simply enter an artist and a song to add the words in the lyrics to the data set.
-          Simple token analysis will be done on the words in the lyrics to determine the percentage
-          of unique words per artist. As more songs are added from each artist the percentage will
-          represent an aggregate of all the songs queried for. The data will then be loaded on a D3
-          bar chart which will graphically represent the percent of unique words in all the songs
-          that have been requested. Cards for each artist will be added below the chart with more
-          detailed information.
+          To use this simply enter an artist and a song to add the words in the lyrics to the data
+          set. Simple token analysis will be done on the words in the lyrics to determine the
+          percentage of unique words per artist. As more songs are added from each artist the
+          percentage will represent an aggregate of all the songs queried for. The data will then
+          be loaded on a D3 bar chart which will graphically represent the percent of unique words
+          in all the songs that have been requested. Cards for each artist will be added below the
+          chart with more detailed information.
         </p>
         <p>
           <em>A note on uniqueness: The tokens would consider words like don't and do not different.
@@ -51,9 +51,9 @@
         <h2>Add Song to Dataset</h2>
         <form id="lyric-request-form">
           <label for="artist">Artist: </label>
-          <input name="artist" type="text" required>
+          <input name="artist" id="artist" type="text" required>
           <label for="song">Song: </label>
-          <input name="song" type="text" required>
+          <input name="song" id="artist" type="text" required>
           <br>
           <button id="submit-btn" type="submit">Add Lyrics</button>
         </form>

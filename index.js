@@ -15,7 +15,7 @@
   const BASE_URL = 'https://api.lyrics.ovh/v1';
 
   // D3 Global variables
-  const CHART_MARGIN = { LEFT: 100, RIGHT: 10, TOP: 25, BOTTOM: 150 };
+  const CHART_MARGIN = {LEFT: 100, RIGHT: 10, TOP: 25, BOTTOM: 150};
   let d3Chart;
   let width, height;
   let xScale, yScale, colorScale;
@@ -30,12 +30,15 @@
   /** Set up the page for user interaction. */
   function init() {
     initChart();
-    id('lyric-request-form').addEventListener('submit', onSubmit);
+    id('lyric-request-form').addEventListener('submit', event => {
+      event.preventDefault();
+      onSubmit();
+    });
   }
 
   // Event Listeners
   /** Check the inputs and make the request when the form is submitted. */
-  function onSubmit(event) {
+  function onSubmit() {
     event.preventDefault();
     createMessage('success', 'Submitting request...');
     let artist = qs('input[name="artist"]').value.trim();
@@ -82,14 +85,15 @@
    * @param {string} artist - The artist to update chart data for.
    */
   function addChartData(artist) {
+    const NOT_FOUND = -1;
     let index = chartData.findIndex(element => {
       return element.artist === artist;
     });
     let newData = {
       artist: artist,
       percentUnique: artistDetails[artist].percentUnique
-    }
-    if (index === -1) {
+    };
+    if (index === NOT_FOUND) {
       chartData.push(newData);
     } else {
       chartData[index] = newData;
@@ -109,8 +113,8 @@
     let isRepeatRequest;
 
     try {
-      isRepeatRequest = artistDetails[artist].requestedSongs.some(s => {
-        return s === song;
+      isRepeatRequest = artistDetails[artist].requestedSongs.some(requestedSong => {
+        return requestedSong === song;
       });
     } catch (error) {
       isRepeatRequest = false;
@@ -118,13 +122,16 @@
     return isRepeatRequest;
   }
 
-  /** Check whether fetch returned a status of 200 OK, throw an error if not. */
+  /**
+   * Check whether fetch returned a status of 200 OK, throw an error if not.
+   * @param {object} response - The response object from the API for the GET request.
+   * @returns {object} Returns the response if ok, otherwise throws error.
+   */
   function checkStatus(response) {
     if (response.ok) {
       return response;
-    } else {
-       throw Error("Error in request: " + response.statusText);
     }
+    throw Error("Error in request: " + response.statusText);
   }
 
   /**
@@ -149,7 +156,7 @@
   function createCard(artist) {
     let artistCard = id(artist);
 
-    if(artistCard) {
+    if (artistCard) {
       artistCard.innerHTML = '';
     } else {
       artistCard = gen('div');
@@ -202,12 +209,13 @@
     lyrics = lyrics.toLowerCase();
 
     // Remove punctuation.
-    let regexPattern = /[.,\/#!$%\^&\*;:{}=\-_`~()\?\n]/g;
+    let regexPattern = new RegExp('[.,\/#!$%\^&\*;:{}=_`~()\?\n]', 'g');
     lyrics = lyrics.replace(regexPattern, ' ');
 
     let words = lyrics.split(' ').filter(word => {
       return word;
     });
+    console.log(words);
     return words;
   }
 
@@ -337,8 +345,8 @@
   /** Uses built in d3 color scale with 12 colors, maps artists to color */
   function getColorScale() {
     return d3.scaleOrdinal()
-      .domain(chartData.map( d => {
-        return d.artist
+      .domain(chartData.map( data => {
+        return data.artist;
       }))
       .range(d3.schemePaired);
   }
@@ -355,8 +363,8 @@
     const PADDING_VALUE = 0.3;
 
     return d3.scaleBand()
-      .domain(chartData.map( d => {
-        return d.artist;
+      .domain(chartData.map( data => {
+        return data.artist;
       }))
       .range([LOWER_RANGE, width])
       .paddingInner(PADDING_VALUE)
@@ -384,7 +392,7 @@
     // X Axis Label
     d3Chart.append('text')
       .attr('class', 'x axis-label')
-      .attr('x', width/2)
+      .attr('x', width / 2)
       .attr('y', height + 125)
       .attr('font-size', '24px')
       .attr('text-anchor', 'middle')
@@ -396,19 +404,19 @@
       .attr('transform', `translate(0, ${height})`)
       .call(X_AXIS_CALL)
       .selectAll('text')
-        .attr('y', '10')
-        .attr('x', '-5')
-        .attr('font-size', '16px')
-        .attr('text-anchor', 'end')
-        .attr('transform', 'rotate(-45)');
+      .attr('y', '10')
+      .attr('x', '-5')
+      .attr('font-size', '16px')
+      .attr('text-anchor', 'end')
+      .attr('transform', 'rotate(-45)');
   }
 
   /** Make the labels and axis for the y axis. */
   function setYAxis() {
     const Y_AXIS_CALL = d3.axisLeft(yScale)
       .ticks(10)
-      .tickFormat( d => {
-        return d + '%';
+      .tickFormat( data => {
+        return data + '%';
       });
 
     // Y Axis Label
@@ -426,7 +434,7 @@
       .attr('class', 'y-axis')
       .call(Y_AXIS_CALL)
       .selectAll('text')
-        .attr('font-size', '16px')
+      .attr('font-size', '16px')
   }
 
   /**
@@ -452,16 +460,16 @@
           return xScale(d.artist);
         })
         .attr('width', xScale.bandwidth)
-        .attr('fill', d => {
-          return colorScale(d.artist);
+        .attr('fill', data => {
+          return colorScale(data.artist);
         })
         .transition(T)
-          .attr('y', d => {
-            return yScale(d.percentUnique);
-          })
-          .attr('height', d => {
-            return height - yScale(d.percentUnique);
-          })
+        .attr('y', data => {
+          return yScale(data.percentUnique);
+        })
+        .attr('height', data => {
+          return height - yScale(data.percentUnique);
+        })
   }
 
   // Given Helper functions
