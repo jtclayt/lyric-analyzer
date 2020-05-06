@@ -88,7 +88,7 @@ section, .card {
 /* Class Rules */
 .card {
   width: 250px;
-  height: 250px;
+  height: 200px;
   margin: 15px;
   padding-left: 10px;
   border: 2px solid white;

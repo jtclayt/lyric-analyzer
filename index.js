@@ -120,7 +120,6 @@
     artist = artist.toLowerCase();
     song = song.toLowerCase();
     let isRepeatRequest;
-    console.log(artistDetails[artist]);
 
     try {
       isRepeatRequest = artistDetails[artist].requestedSongs.some(requestedSong => {
