@@ -377,7 +377,7 @@
     const PADDING_VALUE = 0.3;
 
     return d3.scaleBand()
-      .domain(chartData.map( data => {
+      .domain(chartData.map(data => {
         return data.artist;
       }))
       .range([LOWER_RANGE, width])
@@ -403,13 +403,14 @@
   /** Make the labels and axis for the x axis. */
   function setXAxis() {
     const X_LABEL_X_OFFSET = width / 2;
-    const X_LABEL_Y_OFFSET = height + 125;
+    const CHART_BOTTOM_MARGIN = 125;
+    const X_LABEL_Y_OFFSET = height + CHART_BOTTOM_MARGIN;
     const X_AXIS_CALL = d3.axisBottom(xScale);
 
     // X Axis Label
     d3Chart.append('text')
       .attr('class', 'x axis-label')
-      .attr('x', X_LABEL_X_OFFSET)
+      .attr('x', X_LABEL_Y_OFFSET)
       .attr('y', X_LABEL_Y_OFFSET)
       .attr('font-size', '24px')
       .attr('text-anchor', 'middle')
@@ -432,8 +433,9 @@
   function setYAxis() {
     const Y_LABEL_X_OFFSET = -height / 2;
     const Y_LABEL_Y_OFFSET = -80;
+    const TICK_COUNT = 10;
     const Y_AXIS_CALL = d3.axisLeft(yScale)
-      .ticks(10)
+      .ticks(TICK_COUNT)
       .tickFormat( data => {
         return data + '%';
       });
