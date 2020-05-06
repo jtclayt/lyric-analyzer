@@ -308,6 +308,9 @@
    * @param {string} song - Currently requested song.
    */
   function processResponse(data, artist, song) {
+    if (data.lyrics === "Instrumental"){
+      throw Error('This song has no lyrics. Please search for songs with lyrics.')
+    }
     displayLyrics(artist, song, data.lyrics);
     song = song.toLowerCase();
     artist = artist.toLowerCase();
