@@ -15,7 +15,6 @@ body {
 
 button {
   color: white;
-  background-color: forestgreen;
   margin-top: 10px;
   padding: 5px;
   border-radius: 5px;
@@ -95,7 +94,7 @@ section, .card {
   border: 2px solid white;
 }
 
-.card, #chart {
+.card, #chart, #lyrics > h2 {
   text-transform: capitalize;
 }
 
@@ -112,4 +111,13 @@ section, .card {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-evenly;
+}
+
+#clear-btn {
+  background-color: darkorange;
+  margin: 10px 30px;
+}
+
+#submit-btn {
+  background-color: forestgreen;
 }

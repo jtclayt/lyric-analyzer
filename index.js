@@ -23,21 +23,32 @@
   let chartData = [];
 
   // Webpage global variables
+  const NOT_FOUND = -1;
   let artistDetails = {};
 
   window.addEventListener('load', init);
-  window.addEventListener('resize', initChart);
+  window.addEventListener('resize', buildChart);
 
   /** Set up the page for user interaction. */
   function init() {
-    initChart();
+    buildChart();
     id('lyric-request-form').addEventListener('submit', event => {
       event.preventDefault();
       onSubmit();
     });
+    id('clear-btn').addEventListener('click', onClear);
   }
 
   // Event Listeners
+  /** Remove all artist information and clear chart */
+  function onClear() {
+    artistDetails = {};
+    chartData = [];
+    id('card-container').innerHTML = '';
+    id('lyrics').innerHTML = '';
+    buildChart();
+  }
+
   /** Check the inputs and make the request when the form is submitted. */
   function onSubmit() {
     event.preventDefault();
@@ -86,10 +97,7 @@
    * @param {string} artist - The artist to update chart data for.
    */
   function addChartData(artist) {
-    const NOT_FOUND = -1;
-    let index = chartData.findIndex(element => {
-      return element.artist === artist;
-    });
+    let index = getArtistIndex(artist);
     let newData = {
       artist: artist,
       percentUnique: artistDetails[artist].percentUnique
@@ -112,6 +120,7 @@
     artist = artist.toLowerCase();
     song = song.toLowerCase();
     let isRepeatRequest;
+    console.log(artistDetails[artist]);
 
     try {
       isRepeatRequest = artistDetails[artist].requestedSongs.some(requestedSong => {
@@ -202,6 +211,22 @@
   }
 
   /**
+   * Add current lyrics to the lyrics detail section.
+   * @param {string} artist - The current displayed artist.
+   * @param {string} song - The current displayed song lyrics.
+   * @param {string} lyrics - The lyrics for the current song.
+   */
+  function displayLyrics(artist, song, lyrics) {
+    id('lyrics').innerHTML = '';
+    let h2Tag = gen('h2');
+    h2Tag.textContent = `Artist: ${artist} Song: ${song}`;
+    let pTag = gen('p');
+    pTag.textContent = lyrics;
+    id('lyrics').appendChild(h2Tag);
+    id('lyrics').appendChild(pTag);
+  }
+
+  /**
    * Takes in the string of lyrics from the API and processes it to get individual words.
    * @param {string} lyrics - The lyrics to get words from.
    * @return {array} An array of the words in the lyrics.
@@ -219,6 +244,17 @@
       return word;
     });
     return words;
+  }
+
+  /**
+   *
+   * @param {string} artist - The artist to find the index of.
+   * @return {number} The index of the artist, -1 if not found.
+   */
+  function getArtistIndex(artist) {
+    return chartData.findIndex(element => {
+      return element.artist === artist;
+    });
   }
 
   /** Use the color scale for the d3 chart to determine the broder of each artist card. */
@@ -273,7 +309,7 @@
    * @param {string} song - Currently requested song.
    */
   function processResponse(data, artist, song) {
-    id('lyrics').textContent = data.lyrics;
+    displayLyrics(artist, song, data.lyrics);
     song = song.toLowerCase();
     artist = artist.toLowerCase();
     let words = extractWords(data.lyrics);
@@ -291,7 +327,7 @@
     }
     createCard(artist);
     addChartData(artist);
-    initChart();
+    buildChart();
     getBorderColors();
     let message = `Successfully loaded data for ${song} by ${artist}. Ready to add more songs.`;
     createMessage('success', message);
@@ -323,7 +359,7 @@
    * Finds size available for chart and sets up the d3 chart which is attached to the HTML figure
    * element with id chart. Then loads the available data.
    */
-  function initChart() {
+  function buildChart() {
     getSize();
     if (d3Chart) {
       id('chart').innerHTML = '';
@@ -410,7 +446,7 @@
     // X Axis Label
     d3Chart.append('text')
       .attr('class', 'x axis-label')
-      .attr('x', X_LABEL_Y_OFFSET)
+      .attr('x', X_LABEL_X_OFFSET)
       .attr('y', X_LABEL_Y_OFFSET)
       .attr('font-size', '24px')
       .attr('text-anchor', 'middle')
@@ -436,7 +472,7 @@
     const TICK_COUNT = 10;
     const Y_AXIS_CALL = d3.axisLeft(yScale)
       .ticks(TICK_COUNT)
-      .tickFormat( data => {
+      .tickFormat(data => {
         return data + '%';
       });
 
