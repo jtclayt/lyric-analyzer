@@ -1,8 +1,7 @@
 /**
  * Name: Justin Clayton
- * Date: May 3, 2020
- * Section: CSE 154 AD
- * This is the main JavaScript document for the CP3 webpage and contains all the logic to fetch
+ *
+ * This is the main JavaScript document for the page and contains all the logic to fetch
  * requested songs from the lyrics API. It handles errors if the song can not be found or a fetch
  * error occurs and if the user tries to make repeat requests. This page also handles setting up
  * the bar chart visulisation which is continuously updated on successful requests. When a request
